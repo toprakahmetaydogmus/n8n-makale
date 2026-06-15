@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>n8n ile Otomasyon Dünyasına Giriş: Sıfırdan İleri Seviyeye Kapsamlı Makale</title>
+  <meta name="description" content="Sıfırdan ileri seviyeye n8n otomasyon makalesi. Docker kurulumu, entegrasyonlar, yapay zeka ajanları ve hata yönetimi ile iş akışlarınızı otomatikleştirin.">
+  <meta name="author" content="Toprak Ahmet Aydoğmuş — Siber Akademi">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="https://raw.githubusercontent.com/toprakahmetaydogmus/Makale/main/logo.jpg" type="image/jpeg">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+    /* --- CSS Variables & Design Tokens --- */
+    :root {
+      --bg-color: #080b11;
+      --bg-gradient: radial-gradient(circle at 50% 0%, #151c30 0%, #080b11 70%);
+      --panel-bg: rgba(18, 25, 41, 0.7);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --primary: #ff6d5a;      /* n8n brand coral */
+      --primary-glow: rgba(255, 109, 90, 0.35);
+      --secondary: #6366f1;    /* Accent Indigo */
+      --secondary-glow: rgba(99, 102, 241, 0.35);
+      
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-code: 'Fira Code', monospace;
+      
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --border-radius-sm: 8px;
+      --border-radius-md: 16px;
+      --border-radius-lg: 24px;
+    }
+
+    /* --- Base Resets --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: var(--bg-gradient);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-color);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--panel-border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Typography Utility */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+
+    a:hover {
+      color: var(--text-primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* --- Layout Grid --- */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* --- Header & Navigation Bar --- */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      z-index: 1000;
+      background: rgba(8, 11, 17, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+    }
+
+    header .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .logo img {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+      object-fit: cover;
+    }
+
+    .search-box {
+      position: relative;
+      max-width: 350px;
+      width: 100%;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--panel-border);
+      padding: 10px 75px 10px 40px;
+      border-radius: 50px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 15px var(--primary-glow);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      fill: var(--text-secondary);
+      pointer-events: none;
+      width: 16px;
+      height: 16px;
+    }
+
+    .search-counter {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 20px;
+      pointer-events: none;
+      display: none;
+      user-select: none;
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-ctrl {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-ctrl:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* Reading Progress Bar */
+    .progress-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: transparent;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      box-shadow: 0 0 8px var(--primary-glow);
+      transition: width 0.1s ease-out;
+    }
+
+    /* --- Hero Section (3D & Interactive) --- */
+    .hero {
+      margin-top: 70px;
+      padding: 100px 0 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 109, 90, 0.08) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 100%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-perspective {
+      perspective: 1000px;
+      z-index: 10;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .hero-card-3d {
+      width: 100%;
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius-lg);
+      padding: 50px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card-3d:hover {
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 109, 90, 0.15);
+    }
+
+    .hero-card-3d::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255, 109, 90, 0.15);
+      border: 1px solid rgba(255, 109, 90, 0.3);
+      color: var(--primary);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transform: translateZ(40px);
+    }
+
+    .hero-card-3d h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transform: translateZ(60px);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 30px;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transform: translateZ(30px);
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .author-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .author-details p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .author-details h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .meta-stats {
+      display: flex;
+      gap: 20px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .meta-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-stat-item svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+    }
+
+    /* --- Main Layout: SideNav + Content --- */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 50px;
+      padding-bottom: 100px;
+      position: relative;
+      align-items: start;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      position: sticky;
+      top: 100px;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      padding-right: 15px;
+    }
+
+    /* Custom mini scrollbar for sidebar */
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      padding-left: 10px;
+      font-weight: 700;
+    }
+
+    .toc-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toc-item a {
+      display: block;
+      padding: 8px 12px;
+      border-radius: var(--border-radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-left: 2px solid transparent;
+      transition: var(--transition-smooth);
+    }
+
+    .toc-item a:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+      border-left-color: var(--text-muted);
+    }
+
+    .toc-item.active a {
+      background: rgba(255, 109, 90, 0.08);
+      color: var(--primary);
+      border-left-color: var(--primary);
+      font-weight: 600;
+      box-shadow: inset 1px 0 0 rgba(255, 109, 90, 0.1);
+    }
+
+    /* --- Content Section --- */
+    .content-wrapper {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius-lg);
+      padding: 60px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Article Styling */
+    article section {
+      margin-bottom: 60px;
+      padding-bottom: 60px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: border-bottom-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    article section.active-match {
+      border-bottom-color: var(--primary) !important;
+      box-shadow: 0 10px 30px rgba(255, 109, 90, 0.1);
+    }
+
+    article section:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    article section h2 {
+      font-size: 2.1rem;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    article section h2::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 28px;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 4px;
+    }
+
+    article section h3 {
+      font-size: 1.4rem;
+      margin: 32px 0 16px;
+      color: #fff;
+    }
+
+    article p {
+      margin-bottom: 20px;
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    /* Strong highlight */
+    article p strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Lists */
+    article ul, article ol {
+      margin: 0 0 24px 24px;
+      color: var(--text-secondary);
+    }
+
+    article li {
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+    }
+
+    /* Highlights search */
+    mark.search-highlight {
+      background: rgba(255, 109, 90, 0.3);
+      color: #fff;
+      border-radius: 2px;
+      padding: 0 2px;
+      box-shadow: 0 0 8px rgba(255, 109, 90, 0.5);
+    }
+
+    /* Custom Callout Boxes */
+    .callout {
+      padding: 24px;
+      border-radius: var(--border-radius-md);
+      margin: 30px 0;
+      border-left: 4px solid;
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .callout-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .callout-content {
+      flex: 1;
+    }
+
+    .callout-content h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .callout-content p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+    }
+
+    /* Info Callout */
+    .callout.info {
+      border-left-color: var(--secondary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    .callout.info h4 { color: #818cf8; }
+
+    /* Tip Callout */
+    .callout.tip {
+      border-left-color: var(--success);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .callout.tip h4 { color: #34d399; }
+
+    /* Warning Callout */
+    .callout.warning {
+      border-left-color: var(--warning);
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .callout.warning h4 { color: #fbbf24; }
+
+    /* Code Block Styling */
+    .code-container {
+      margin: 30px 0;
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--panel-border);
+      overflow: hidden;
+      background: #0d1117;
+      position: relative;
+    }
+
+    .code-header {
+      background: #161b22;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .code-lang {
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-copy {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: var(--border-radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-copy:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .code-container pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: var(--font-code);
+      font-size: 0.95rem;
+    }
+
+    .code-container code {
+      color: #c9d1d9;
+    }
+
+    /* Light syntax highlights for mock presentation */
+    .code-keyword { color: #ff7b72; }
+    .code-string { color: #a5d6ff; }
+    .code-number { color: #79c0ff; }
+    .code-comment { color: #8b949e; font-style: italic; }
+    .code-property { color: #7ee787; }
+    .code-function { color: #d2a8ff; }
+
+    /* Custom Inline Code */
+    code.inline-code {
+      font-family: var(--font-code);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--primary);
+      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    /* --- Interactive Simulator Widget --- */
+    .simulator-widget {
+      background: rgba(20, 26, 40, 0.5);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius-md);
+      padding: 30px;
+      margin: 40px 0;
+    }
+
+    .sim-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .sim-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--panel-border);
+      padding: 8px 16px;
+      border-radius: 50px;
+      color: var(--text-secondary);
+      font-family: var(--font-heading);
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-smooth);
+    }
+
+    .sim-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+
+    .sim-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .sim-diagram {
+      background: #090c14;
+      border-radius: var(--border-radius-sm);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+    }
+
+    .sim-step {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius-sm);
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .sim-step::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 4px;
+      height: 60%;
+      transform: translateY(-50%);
+      border-radius: 2px;
+    }
+
+    .sim-step.trigger::before { background-color: var(--primary); }
+    .sim-step.action::before { background-color: var(--secondary); }
+
+    .step-type {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+
+    .sim-step.trigger .step-type {
+      background: rgba(255, 109, 90, 0.15);
+      color: var(--primary);
+    }
+
+    .sim-step.action .step-type {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--secondary);
+    }
+
+    .step-details {
+      flex: 1;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .sim-arrow {
+      display: flex;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    /* --- Interactive Quiz Widget --- */
+    .quiz-widget {
+      background: radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1) 0%, rgba(18, 25, 41, 0.8) 50%);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius-lg);
+      padding: 40px;
+      margin-top: 60px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+      position: relative;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 20px;
+    }
+
+    .quiz-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-title svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary);
+    }
+
+    .quiz-progress {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .quiz-question {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--panel-border);
+      padding: 16px 20px;
+      border-radius: var(--border-radius-md);
+      color: var(--text-secondary);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: var(--transition-smooth);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .quiz-option.selected {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--secondary);
+      color: var(--text-primary);
+    }
+
+    .quiz-option-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .quiz-option.selected .quiz-option-letter {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .quiz-option.correct .quiz-option-letter {
+      background: var(--success);
+      color: white;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .quiz-option.incorrect .quiz-option-letter {
+      background: var(--danger);
+      color: white;
+    }
+
+    .quiz-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quiz-feedback {
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quiz-feedback.success { color: var(--success); }
+    .quiz-feedback.error { color: var(--danger); }
+
+    .btn-quiz {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border: none;
+      padding: 12px 28px;
+      border-radius: 50px;
+      color: white;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-quiz:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px var(--primary-glow);
+    }
+
+    .btn-quiz:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .quiz-results {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .quiz-score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 4px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .quiz-score-num {
+      font-size: 2.2rem;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .quiz-score-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .quiz-results h4 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+
+    .quiz-results p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* --- Contact & Footer --- */
+    footer {
+      background: #05070a;
+      border-top: 1px solid var(--panel-border);
+      padding: 80px 0 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand h3 {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .footer-brand p {
+      color: var(--text-secondary);
+      max-width: 500px;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .footer-socials {
+      display: flex;
+      gap: 15px;
+    }
+
+    .social-link {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: var(--transition-smooth);
+    }
+
+    .social-link:hover {
+      background: rgba(255, 109, 90, 0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px var(--primary-glow);
+    }
+
+    .social-link svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .footer-contact h4 {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .contact-card-glass {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--panel-border);
+      padding: 24px;
+      border-radius: var(--border-radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .contact-email {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+
+    .btn-email-copy {
+      background: var(--primary);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: var(--border-radius-sm);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-email-copy:hover {
+      background: #ff8575;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-bottom p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .siber-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 4px 12px;
+      border-radius: 50px;
+      color: #a5b4fc;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .siber-badge svg {
+      width: 14px;
+      height: 14px;
+      fill: #818cf8;
+    }
+
+    /* Mobile Menu Toggle Button */
+    .menu-toggle {
+      display: none;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      margin-right: 15px;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* Sidebar Overlay Backdrop */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(4, 6, 10, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 1100px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .menu-toggle {
+        display: flex;
+      }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -320px;
+        width: 300px;
+        height: 100vh;
+        background: #090d16;
+        border-right: 1px solid var(--panel-border);
+        box-shadow: 20px 0 50px rgba(0, 0, 0, 0.6);
+        z-index: 1001;
+        padding: 90px 24px 30px;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 100vh;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-card-3d {
+        padding: 30px;
+      }
+      .hero-card-3d h1 {
+        font-size: 2.2rem;
+      }
+      .content-wrapper {
+        padding: 30px;
+      }
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .search-box {
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      .search-box {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- --- Header & Progress --- -->
+  <header>
+    <div class="container header-container">
+      <div style="display: flex; align-items: center;">
+        <button class="menu-toggle" id="menu-toggle-btn" title="Menü">
+          <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
+        <a href="#" class="logo">
+          <img src="https://raw.githubusercontent.com/toprakahmetaydogmus/Makale/main/logo.jpg" alt="Siber Akademi Logo">
+          <span>Siber Akademi</span>
+        </a>
+      </div>
+
+      <!-- Real-time Search Box -->
+      <div class="search-box">
+        <svg viewBox="0 0 24 24">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Makalede ara...">
+        <span id="search-counter" class="search-counter">0/0</span>
+      </div>
+    </div>
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+  </header>
+
+  <!-- --- Hero Section (3D card) --- -->
+  <section class="hero">
+    <div class="container hero-perspective">
+      <div class="hero-card-3d">
+        <div class="hero-tag">Makale &amp; Eğitim</div>
+        <h1>n8n ile Otomasyon Dünyasına Giriş:<br>Sıfırdan İleri Seviyeye Kapsamlı Makale</h1>
+        
+        <div class="hero-meta">
+          <div class="author-info">
+            <div class="author-avatar">
+              <img src="https://raw.githubusercontent.com/toprakahmetaydogmus/Makale/main/logo.jpg" alt="Toprak Ahmet Aydoğmuş">
+            </div>
+            <div class="author-details">
+              <p>Yazar</p>
+              <h4>Toprak Ahmet Aydoğmuş</h4>
+            </div>
+          </div>
+          <div class="meta-stats">
+            <div class="meta-stat-item">
+              <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+              <span>25 Dk Okuma</span>
+            </div>
+            <div class="meta-stat-item">
+              <svg viewBox="0 0 24 24"><path d="M12 11.55C9.64 9.35 6.48 8 3 8v11c3.48 0 6.64 1.35 9 3.55 2.36-2.2 5.52-3.55 9-3.55V8c-3.48 0-6.64 1.35-9 3.55zM12 2C9.48 2 7.03 2.9 5.2 4.5 3.37 6.1 2.3 8.35 2 10.75v11.45c0 .17.06.32.18.44.11.12.27.18.43.18.12 0 .23-.03.34-.08 2.85-1.12 6.02-1.74 9.05-1.74 3.03 0 6.2.62 9.05 1.74.11.05.22.08.34.08.16 0 .32-.06.43-.18.12-.12.18-.27.18-.44V10.75c-.3-2.4-1.37-4.65-3.2-6.25C16.97 2.9 14.52 2 12 2z"/></svg>
+              <span>16 Bölüm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- --- Main Layout --- -->
+  <div class="container main-layout">
+    
+    <!-- Sidebar / Sticky TOC -->
+    <aside class="sidebar">
+      <div class="sidebar-title">İçindekiler</div>
+      <ul class="toc-menu">
+        <li class="toc-item" data-section="giris"><a href="#giris">Giriş</a></li>
+        <li class="toc-item" data-section="bolum-1"><a href="#bolum-1">Bölüm 1: Otomasyon Nedir?</a></li>
+        <li class="toc-item" data-section="bolum-2"><a href="#bolum-2">Bölüm 2: n8n Nedir?</a></li>
+        <li class="toc-item" data-section="bolum-3"><a href="#bolum-3">Bölüm 3: n8n Kurulum Yöntemleri</a></li>
+        <li class="toc-item" data-section="bolum-4"><a href="#bolum-4">Bölüm 4: Arayüzü Tanıyalım</a></li>
+        <li class="toc-item" data-section="bolum-5"><a href="#bolum-5">Bölüm 5: İlk Otomasyon</a></li>
+        <li class="toc-item" data-section="bolum-6"><a href="#bolum-6">Bölüm 6: Tetikleyiciler</a></li>
+        <li class="toc-item" data-section="bolum-7"><a href="#bolum-7">Bölüm 7: Kimlik Bilgileri</a></li>
+        <li class="toc-item" data-section="bolum-8"><a href="#bolum-8">Bölüm 8: Temel Node Türleri</a></li>
+        <li class="toc-item" data-section="bolum-9"><a href="#bolum-9">Bölüm 9: İfadeler (Expressions)</a></li>
+        <li class="toc-item" data-section="bolum-10"><a href="#bolum-10">Bölüm 10: Otomasyon Projesi</a></li>
+        <li class="toc-item" data-section="bolum-11"><a href="#bolum-11">Bölüm 11: Yapay Zeka ile n8n</a></li>
+        <li class="toc-item" data-section="bolum-12"><a href="#bolum-12">Bölüm 12: Entegrasyonlar</a></li>
+        <li class="toc-item" data-section="bolum-13"><a href="#bolum-13">Bölüm 13: Hata Yönetimi</a></li>
+        <li class="toc-item" data-section="bolum-14"><a href="#bolum-14">Bölüm 14: İleri Seviye İpuçları</a></li>
+        <li class="toc-item" data-section="bolum-15"><a href="#bolum-15">Bölüm 15: Sık Sorulan Sorular</a></li>
+        <li class="toc-item" data-section="bolum-16"><a href="#bolum-16">Bölüm 16: Sonuç</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Reader -->
+    <main class="content-wrapper">
+      <article>
+        
+        <!-- Giriş -->
+        <section id="giris">
+          <h2>Giriş: Bu Makale Kime Hitap Ediyor?</h2>
+          <p>Eğer "otomasyon" kelimesini duyduğunuzda akla hemen karmaşık kod satırları, yazılım mühendisleri ve anlaşılmaz terimler geliyorsa, bu makale tam size göre. Bilgisayar mühendisi olmanıza, kodlama bilmenize ya da "API" kelimesinin ne anlama geldiğini bilmenize gerek yok. Sıfırdan başlayıp, adım adım, hiçbir şeyi atlamadan, gerçek hayattan örneklerle n8n'in ne olduğunu, nasıl kurulduğunu, nasıl kullanıldığını ve günlük hayatınızda ya da işinizde nasıl mucizevi şekilde zaman kazandırabileceğini anlatacağız.</p>
+          <p>Bu makaleyi okuduktan sonra, e-postalarınızı otomatik olarak düzenleyen, sosyal medya hesaplarınızı otomatik besleyen, müşteri taleplerini otomatik yöneten, hatta kahve makinenizi (evet, doğru okudunuz) tetikleyebilen sistemler kurabilecek seviyeye geleceksiniz. Hazırsanız başlayalım.</p>
+        </section>
+
+        <!-- Bölüm 1 -->
+        <section id="bolum-1">
+          <h2>Bölüm 1: Otomasyon Nedir? Neden Hayatımıza Bu Kadar Çok Girdi?</h2>
+          <h3>1.1 Günlük Hayattan Bir Örnekle Başlayalım</h3>
+          <p>Diyelim ki her sabah işe gitmeden önce şu işleri yapıyorsunuz:</p>
+          <ol>
+            <li>Telefonunuzu açıyorsunuz</li>
+            <li>Hava durumuna bakıyorsunuz</li>
+            <li>E-postalarınızı kontrol ediyorsunuz</li>
+            <li>Önemli olanları ayrı bir klasöre taşıyorsunuz</li>
+            <li>Takım arkadaşlarınıza günün planını bir mesaj olarak gönderiyorsunuz</li>
+            <li>Sosyal medya hesaplarınızdan birine günün ilk paylaşımını yapıyorsunuz</li>
+          </ol>
+          <p>Bu işlemlerin her biri tek tek ele alındığında basit gibi görünür ama hepsini her gün, manuel olarak, tek tek yapmak hem zaman alır hem de can sıkıcıdır. Peki ya bu adımların <strong>hepsini otomatik olarak, siz uyurken bile çalışan bir sistem</strong> yapsa?</p>
+          <p>İşte otomasyon tam olarak bunu sağlar: <strong>"Eğer şu olursa, şunu yap"</strong> mantığıyla çalışan, insan müdahalesi olmadan tekrar eden görevleri kendi başına gerçekleştiren sistemler kurmaktır.</p>
+
+          <div class="callout info">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <h4>1.2 Otomasyonun Temel Mantığı: Tetikleyici ve Aksiyon</h4>
+              <p>Every automation has two main components:</p>
+              <p><strong>Tetikleyici (Trigger):</strong> "Ne zaman" sorusuna cevap verir. Örneğin: Her gün sabah 08:00'de, e-posta geldiğinde, form doldurulduğunda...</p>
+              <p><strong>Aksiyon (Action):</strong> "Ne yapılacak" sorusuna cevap verir. Örneğin: Bir mesaj gönder, tabloya satır ekle, e-posta yolla...</p>
+            </div>
+          </div>
+
+          <h3>1.3 Otomasyon Neden Bu Kadar Popüler Oldu?</h3>
+          <p>Son yıllarda şirketler ve bireyler, tekrar eden, "düşünmeye gerek olmayan ama zaman alan" işlerin yapay zeka ve otomasyon araçlarıyla devredilebileceğini fark ettiler. Bu durum üç ana sebepten kaynaklanıyor:</p>
+          <p><strong>Birincisi</strong>, dijital araçların sayısı patladı. Artık herkesin kullandığı onlarca farklı uygulama var: e-posta, takvim, CRM (müşteri yönetim sistemleri), sosyal medya, ödeme sistemleri, depolama servisleri, mesajlaşma uygulamaları... Bu kadar çok aracın hepsini elle yönetmek mümkün değil.</p>
+          <p><strong>İkincisi</strong>, bu araçların çoğu birbirleriyle "konuşabiliyor". Yani bir uygulamadan veri alıp başka bir uygulamaya gönderebiliyorsunuz — buna teknik olarak <strong>entegrasyon</strong> denir.</p>
+          <p><strong>Üçüncüsü</strong>, yapay zeka (özellikle ChatGPT, Claude gibi dil modelleri) artık otomasyonların içine entegre edilebiliyor. Bu da otomasyonları sadece "mekanik" işler için değil, "düşünme gerektiren" işler için de kullanılabilir kılıyor. Örneğin gelen bir müşteri e-postasını yapay zeka okuyup, hangi departmana yönlendirilmesi gerektiğine karar verebiliyor — tamamen otomatik.</p>
+
+          <h3>1.4 Otomasyon Araçlarına Genel Bir Bakış</h3>
+          <p>Piyasada birçok otomasyon aracı var. En bilinenleri şunlardır:</p>
+          <ul>
+            <li><strong>Zapier:</strong> Kullanımı çok kolay ama ücretli planları pahalı, özelleştirme imkanı sınırlı.</li>
+            <li><strong>Make (eski adıyla Integromat):</strong> Görsel ve güçlü, ama abonelik bazlı ve karmaşık akışlarda maliyet artıyor.</li>
+            <li><strong>n8n:</strong> Açık kaynaklı (yani kodu herkese açık ve ücretsiz kullanılabilir), kendi sunucunuzda barındırabiliyorsunuz, sınırsız otomasyon kurabiliyorsunuz ve hem görsel hem kod tabanlı çalışabiliyor.</li>
+          </ul>
+          <p>İşte bu makalede <strong>n8n</strong>'i seçtik çünkü ücretsiz olarak kendi bilgisayarınızda veya bir sunucuda çalıştırabilir, sınırsız otomasyon kurabilir ve yapay zeka entegrasyonu da dahil olmak üzere 400'den fazla uygulamayla kod yazmadan çalıştırabilirsiniz.</p>
+        </section>
+
+        <!-- Bölüm 2 -->
+        <section id="bolum-2">
+          <h2>Bölüm 2: n8n Nedir? Detaylı Tanıtım</h2>
+          <h3>2.1 n8n'in Hikayesi</h3>
+          <p>n8n ("nodemation" kelimesinden geliyor, "n-8-n" şeklinde okunur — aradaki 8 harf "odematio" kelimesinin kısaltmasıdır) Almanya merkezli bir şirket tarafından geliştirilen açık kaynaklı bir iş akışı otomasyon platformudur. n8n'in en büyük avantajı, <strong>"fair-code"</strong> lisansı altında dağıtılmasıdır. Bu, kişisel veya iç kullanım için tamamen ücretsiz olduğu anlamına gelir.</p>
+
+          <h3>2.2 n8n ile Ne Yapabilirsiniz? Gerçek Hayat Örnekleri</h3>
+          <p>Hayal gücünüzün sınırları kadar çok şey yapabilirsiniz, ama işte size somut, gerçek hayatta kullanılan örnekler:</p>
+          <ul>
+            <li><strong>E-posta Yönetimi:</strong> Gmail'inize gelen her e-postayı okuyup Telegram'dan bildirim göndermek.</li>
+            <li><strong>Sosyal Medya Yönetimi:</strong> Google Sheets'teki içerikleri otomatik olarak X, LinkedIn veya Instagram'da planlayıp paylaşmak.</li>
+            <li><strong>Müşteri Takibi:</strong> Web form doldurulduğunda verileri CRM'e yazıp Slack üzerinden takıma bildirmek.</li>
+            <li><strong>Yapay Zeka Destekli Müşteri Hizmetleri:</strong> Gelen soruları Claude/ChatGPT'ye okutarak otomatik taslak cevaplar üretmek.</li>
+            <li><strong>Fatura ve Muhasebe:</strong> Gelen PDF faturalarını otomatik Google Drive'a kaydedip muhasebe tablolarını güncellemek.</li>
+          </ul>
+
+          <h3>2.3 n8n'in Temel Kavramları: Sözlük</h3>
+          <p>n8n öğrenirken karşınıza çıkacak temel terimleri burada açıklayalım:</p>
+          <p><strong>Workflow (İş Akışı):</strong> Bir otomasyonun tüm yapısına verilen isimdir. Bir workflow, birbirine bağlı "node"lardan (düğümlerden) oluşur.</p>
+          <p><strong>Node (Düğüm):</strong> Bir workflow içindeki her bir "kutucuk"tur. Her node bir işlem yapar (veri çeker, filtreler, gönderir).</p>
+          <p><strong>Trigger Node (Tetikleyici Düğüm):</strong> Bir workflow'un nasıl başlayacağını belirleyen özel node türüdür. Her workflow'da en az bir tetikleyici bulunmalıdır.</p>
+          <p><strong>Credential (Kimlik Bilgisi):</strong> n8n'in Gmail, Telegram gibi dış servislere bağlanabilmesi için şifrelediği ve güvenle sakladığı API anahtarı veya giriş bilgileridir.</p>
+          <p><strong>JSON:</strong> Verinin bilgisayarlar arasında taşınmasında kullanılan format. Düğümler arası tüm veri bu şekilde akar.</p>
+        </section>
+
+        <!-- Bölüm 3 -->
+        <section id="bolum-3">
+          <h2>Bölüm 3: n8n'i Kurmak — Tüm Yöntemler</h2>
+
+          <h3>3.1 Yöntem 1: Node.js ve npm ile Lokal Kurulum (Windows, macOS, Linux)</h3>
+          <p>n8n, Node.js tabanlı bir uygulama olduğu için Docker kullanmadan, doğrudan bilgisayarınızın işletim sistemine native olarak da kurulabilir. Bunun için bilgisayarınızda <strong>Node.js (v18+ veya v20+)</strong> yüklü olmalıdır.</p>
+          
+          <div class="callout info">
+            <div class="callout-icon">💻</div>
+            <div class="callout-content">
+              <h4>Adım Adım npm ile İşletim Sistemlerine Kurulum</h4>
+              
+              <h5 style="margin-top: 10px; margin-bottom: 5px; color: #fff; font-weight: 600;">Windows için Kurulum:</h5>
+              <p>1. <a href="https://nodejs.org" target="_blank">nodejs.org</a> adresine gidin ve <strong>LTS (Recommended)</strong> sürümünü indirip kurun.</p>
+              <p>2. Arama çubuğuna <strong>PowerShell</strong> veya <strong>CMD</strong> yazıp yönetici olarak çalıştırın.</p>
+              <p>3. n8n'i global olarak kurmak için şu komutu yazıp Enter'a basın:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>npm install n8n -g</code></pre>
+              </div>
+              <p>4. Kurulum bittikten sonra n8n'i başlatmak için şu komutu çalıştırın:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>n8n start</code></pre>
+              </div>
+
+              <h5 style="margin-top: 15px; margin-bottom: 5px; color: #fff; font-weight: 600;">macOS için Kurulum:</h5>
+              <p>1. Node.js LTS sürümünü resmi sitesinden indirin veya <strong>Homebrew</strong> ile kurun: <code class="inline-code">brew install node</code></p>
+              <p>2. Terminal (Terminal.app) uygulamasını açıp global kurulum komutunu çalıştırın:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>npm install n8n -g</code></pre>
+              </div>
+              <p>3. Kurulum tamamlandığında n8n'i şu komutla ayağa kaldırın:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>n8n start</code></pre>
+              </div>
+
+              <h5 style="margin-top: 15px; margin-bottom: 5px; color: #fff; font-weight: 600;">Linux (Ubuntu/Debian) için Kurulum:</h5>
+              <p>1. Terminal'i açıp paket listesini güncelleyin ve Node.js ile npm paketlerini kurun:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>sudo apt update && sudo apt install nodejs npm -y</code></pre>
+              </div>
+              <p>2. n8n'i izin hatalarını bypass ederek global kurmak için şu komutu çalıştırın:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>sudo npm install n8n -g --unsafe-perm</code></pre>
+              </div>
+              <p>3. Sunucuyu başlatmak için şu komutu yazın:</p>
+              <div class="code-container" style="margin: 10px 0;">
+                <pre><code>n8n start</code></pre>
+              </div>
+            </div>
+          </div>
+          
+          <p>Kurulum komutunu çalıştırdıktan sonra terminalinizde n8n'in çalıştığı port bilgisi (varsayılan: <strong>http://localhost:5678</strong>) görüntülenecektir. Tarayıcınızdan bu adrese giderek kurulum şifrenizi belirleyebilirsiniz.</p>
+          
+          <h3>3.2 Yöntem 2: n8n Cloud (En Kolay Yol)</h3>
+          <p>Hiçbir teknik kurulumla uğraşmak istemiyorsanız, <a href="https://n8n.io" target="_blank">n8n.io</a> üzerinden bulut hesabı açarak doğrudan tarayıcınızdan kullanmaya başlayabilirsiniz. Sunucu bakımı, güncelleme veya kesintilerle uğraşmazsınız, ancak ücretsiz deneme süresi bittikten sonra ücretli paket almanız gerekir.</p>
+
+          <h3>3.3 Yöntem 3: Kendi Bilgisayarınızda Docker ile Çalıştırmak (Self-Hosted)</h3>
+          <p>Ücretsiz ve sınırsız kullanmak istiyorsanız, en popüler yol Docker kullanmaktır. Docker, uygulamayı hazır paketler halinde işletim sisteminizden bağımsız çalıştırır.</p>
+          
+          <div class="callout tip">
+            <div class="callout-icon">⚡</div>
+            <div class="callout-content">
+              <h4>Adım Adım Docker ile Kurulum</h4>
+              <p>1. <strong>docker.com</strong> adresinden Docker Desktop indirip kurun.</p>
+              <p>2. Terminal / PowerShell pencerenizi açın.</p>
+              <p>3. n8n'i başlatmak için sırasıyla şu komutları çalıştırın:</p>
+            </div>
+          </div>
+
+          <div class="code-container">
+            <div class="code-header">
+              <span class="code-lang">Bash / Terminal</span>
+              <button class="btn-copy">
+                <svg style="width: 14px; height: 14px; fill: var(--text-secondary);" viewBox="0 0 24 24">
+                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg> Kopyala
+              </button>
+            </div>
+            <pre><code><span class="code-comment"># n8n verilerinin kalıcı olarak saklanacağı klasörü oluştur</span>
+docker volume create n8n_data
+
+<span class="code-comment"># n8n'i Docker üzerinde 5678 portunda çalıştır</span>
+docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n</code></pre>
+          </div>
+
+          <p>Komut çalıştıktan ve indirme bittikten sonra tarayıcınızda <strong>http://localhost:5678</strong> adresine giderek n8n'e erişebilirsiniz.</p>
+
+          <div class="callout warning">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-content">
+              <h4>Önemli Kurulum Notu</h4>
+              <p>Terminal penceresini kapatırsanız kendi bilgisayarınızdaki n8n de durur. 7/24 kesintisiz otomasyonlar için bilgisayarınızın sürekli açık kalması ya da n8n'i bir sunucuya (VPS) kurmanız gerekir.</p>
+            </div>
+          </div>
+
+          <h3>3.4 Yöntem 4: Sunucuda (VPS) Kalıcı Kurulum</h3>
+          <p>Bilgisayarınız kapalıyken otomasyonlarınızın devam etmesi için DigitalOcean, Hetzner veya AWS gibi sağlayıcılardan aylık 5-10 dolarlık bir sanal sunucu (Ubuntu VPS) kiralayarak Docker ile n8n'i 7/24 çalışacak şekilde konumlandırabilirsiniz.</p>
+        </section>
+
+        <!-- Bölüm 4 -->
+        <section id="bolum-4">
+          <h2>Bölüm 4: n8n Arayüzünü Tanıyalım</h2>
+          <p>n8n arayüzü son derece sezgisel ve temizdir. Üç temel alandan oluşur:</p>
+          
+          <h3>4.1 Ana Ekran ve Sol Menü</h3>
+          <p>Giriş yaptığınızda sol menüde projelerinizi (Workflows), kayıtlı bağlantı bilgilerinizi (Credentials), geçmiş çalıştırma kayıtlarını (Executions) ve hazır şablon kütüphanesini (Templates) yönetebileceğiniz alanlar bulunur.</p>
+
+          <h3>4.2 Workflow Düzenleme Alanı (Canvas)</h3>
+          <p>Büyük, boş gri alan otomasyonlarınızı görsel olarak oluşturacağınız çalışma tuvalidir (canvas). Ortadaki "+" butonuyla veya tuvale çift tıklayarak ilk adımınızı ekleyebilirsiniz. Sağ üstte yer alan <strong>Active/Inactive Toggle</strong> butonu, iş akışınız bittiğinde sistemi 7/24 aktif hale getirmenizi sağlar.</p>
+
+          <h3>4.3 Düğüm (Node) Ayar Paneli</h3>
+          <p>Canvas üzerindeki herhangi bir düğüme çift tıkladığınızda ayar paneli açılır. Sol tarafta bir önceki adımdan gelen ham veri (Input), ortada düğmenin ayarları (örn. kime mail gönderileceği), sağ tarafta ise bu düğümün ürettiği veri (Output) görünür.</p>
+        </section>
+
+        <!-- Bölüm 5 -->
+        <section id="bolum-5">
+          <h2>Bölüm 5: İlk Otomasyonunuzu Oluşturalım — "Merhaba Dünya"</h2>
+          <p>n8n'in çalışma mantığını anlamak için gelin butona basınca çalışan basit bir iş akışı kuralım.</p>
+          
+          <ol>
+            <li>Canvas'ta "+" butonuna tıklayın, arama kısmına <strong>Manual</strong> yazıp <strong>"Trigger manually"</strong> düğümünü ekleyin.</li>
+            <li>Düğümün yanındaki "+" işaretine tıklayarak <strong>Edit Fields (Set)</strong> düğümünü bağlayın.</li>
+            <li>Edit Fields ayarlarında "Add Field" butonuna tıklayıp şu değerleri girin:
+              <ul>
+                <li><strong>Name:</strong> <code class="inline-code">mesaj</code></li>
+                <li><strong>Type:</strong> String</li>
+                <li><strong>Value:</strong> <code class="inline-code">Merhaba! İlk n8n otomasyonumu başarıyla kurdum.</code></li>
+              </ul>
+            </li>
+            <li>Sağ üstteki <strong>"Test workflow"</strong> butonuna basın.</li>
+          </ol>
+
+          <p>Çalışma bittiğinde düğümler üzerinde yeşil onay işaretleri belirecektir. Edit Fields düğüme çift tıkladığınızda sağdaki çıktı panelinde şu JSON verisini ürettiğini göreceksiniz:</p>
+
+          <div class="code-container">
+            <div class="code-header">
+              <span class="code-lang">JSON</span>
+            </div>
+            <pre><code>{
+  <span class="code-property">"mesaj"</span>: <span class="code-string">"Merhaba! İlk n8n otomasyonumu başarıyla kurdum."</span>
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Bölüm 6 -->
+        <section id="bolum-6">
+          <h2>Bölüm 6: Tetikleyiciler (Triggers) — Otomasyonunuz Nasıl Başlar?</h2>
+          <p>Bir otomasyon sürecinin başlaması için bir olayın tetiklenmesi gerekir. n8n'deki en popüler tetikleyiciler:</p>
+          
+          <p><strong>Manual Trigger:</strong> Sadece test amaçlı, siz tuşa basınca çalışır.</p>
+          <p><strong>Schedule Trigger:</strong> Belirlenen zaman dilimlerinde (Örn: Her sabah 08:00'de, her 15 dakikada bir) işi başlatır.</p>
+          
+          <div class="callout info">
+            <div class="callout-icon">🔗</div>
+            <div class="callout-content">
+              <h4>Webhook Trigger</h4>
+              <p>n8n size özel bir internet adresi (URL) verir. Dışarıdaki bir sistem (iletişim formu, ödeme kanalı) bu URL'ye veri gönderdiği (POST/GET) anda otomasyon anında tetiklenir ve gelen veriyi işler.</p>
+            </div>
+          </div>
+
+          <p><strong>App Triggers:</strong> Belirli bir uygulamada olan olayları izler. (Örn: Gmail'e yeni mail geldiğinde, Google Sheets'e yeni satır eklendiğinde).</p>
+        </section>
+
+        <!-- Bölüm 7 -->
+        <section id="bolum-7">
+          <h2>Bölüm 7: Kimlik Bilgileri (Credentials) — n8n'i Diğer Uygulamalara Bağlamak</h2>
+          <p>n8n'in dış servislerle konuşabilmesi için yetkilendirilmesi gerekir. Bunun için <strong>API Key</strong> (şifre niteliğinde uzun kodlar) veya <strong>OAuth</strong> (Google ile Giriş Yap benzeri izin ekranları) kullanılır.</p>
+
+          <h3>7.1 Telegram Botu Bağlantı Örneği</h3>
+          <p>Telegram, ücretsiz ve hızlı bot desteğiyle n8n projelerini test etmek için harika bir mecradır.</p>
+          <ol>
+            <li>Telegram'da <strong>@BotFather</strong> hesabını bulun, <code class="inline-code">/newbot</code> komutuyla bot oluşturun ve size verdiği **HTTP API Token** değerini kopyalayın.</li>
+            <li>n8n'de **Credentials -> Add Credential -> Telegram** adımlarını izleyip bu token'ı kaydedin.</li>
+            <li>Botunuza gidip sohbeti başlatmak için <code class="inline-code">/start</code> yazın.</li>
+            <li>n8n'de oluşturduğunuz Telegram düğümünün "Chat ID" kısmına kendi ID'nizi ve göndermek istediğiniz mesajı girip test edin.</li>
+          </ol>
+        </section>
+
+        <!-- Bölüm 8 -->
+        <section id="bolum-8">
+          <h2>Bölüm 8: Temel Node Türleri — Verinizi İşlemek</h2>
+          <p>Gelen verileri düzenlemek, yönlendirmek veya filtrelemek için kullanılan yerleşik n8n araçları:</p>
+          
+          <p><strong>Edit Fields (Set):</strong> Veri alanlarını yeniden adlandırmak veya yeni değişkenler tanımlamak için kullanılır.</p>
+          <p><strong>IF Node:</strong> Gelen veriyi bir koşula göre iki farklı yola (True / False) ayırır. (Örn: Konuda 'Fatura' yazıyor mu?).</p>
+          <p><strong>Switch Node:</strong> Gelen veriyi çoklu dallara böler (Örn: Destek, Satış, Şikayet departmanlarına yönlendirme).</p>
+          <p><strong>Loop Over Items:</strong> Liste halinde gelen çoklu verileri (örn. tablodaki 50 satır) tek tek döngüye sokarak işlem yapar.</p>
+          <p><strong>Merge Node:</strong> İki farklı kaynaktan gelen veriyi eşleştirerek birleştirir.</p>
+          <p><strong>HTTP Request:</strong> n8n'de hazır düğümü bulunmayan herhangi bir web servisinin API'sine doğrudan bağlantı kurarak veri alışverişi sağlar.</p>
+        </section>
+
+        <!-- Bölüm 9 -->
+        <section id="bolum-9">
+          <h2>Bölüm 9: İfadeler (Expressions) — n8n'in Gizli Süper Gücü</h2>
+          <p>Bir düğümdeki verileri bir sonraki düğümde dinamik olarak kullanmak için çift süslü parantez <code class="inline-code">{{ }}</code> yapıları (Expressions) kullanılır.</p>
+          
+          <div class="code-container">
+            <div class="code-header">
+              <span class="code-lang">Örnek İfade Yapıları</span>
+            </div>
+            <pre><code><span class="code-comment">// Gelen verideki mail adresini dinamik oku</span>
+{{ $json.email }}
+
+<span class="code-comment">// İsim ve soyisimi birleştirerek kullan</span>
+Merhaba {{ $json.ad }} {{ $json.soyad }}, siparişiniz alındı.
+
+<span class="code-comment">// Tarih bilgisi ekle</span>
+İşlem Tarihi: {{ $now }}</code></pre>
+          </div>
+        </section>
+
+        <!-- Bölüm 10 -->
+        <section id="bolum-10">
+          <h2>Bölüm 10: Gerçek Bir Otomasyon Projesi — Adım Adım</h2>
+          <p>Şimdi popüler bir senaryoyu tasarlayalım: <strong>Web sitesindeki iletişim formu doldurulduğunda, bilgileri Google Sheets'e kaydet, Telegram'dan admin'e bildir ve müşteriye teşekkür maili at.</strong></p>
+
+          <!-- Interactive Workflow Simulator -->
+          <div class="simulator-widget">
+            <h4 style="margin-bottom: 15px; font-family: var(--font-heading);">İnteraktif Akış Simülatörü</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 20px;">Farklı otomasyon senaryolarının n8n üzerinde nasıl aktığını görmek için aşağıdaki sekmelere tıklayın:</p>
+            <div class="sim-tabs">
+              <div class="sim-tab active" data-sim="form">Müşteri Formu Projesi</div>
+              <div class="sim-tab" data-sim="fiyat">Fiyat Takip Sistemi</div>
+              <div class="sim-tab" data-sim="ai">Yapay Zeka Destek Masası</div>
+            </div>
+            <div class="sim-diagram" id="sim-steps">
+              <!-- JS will load steps here -->
+            </div>
+          </div>
+
+          <p>Bu akışı kurarken sırasıyla:</p>
+          <ol>
+            <li><strong>Webhook Düğümü:</strong> POST formatında sitenizden gelen form verilerini dinler.</li>
+            <li><strong>Google Sheets Düğümü:</strong> <i>Append Row</i> işlemi ile gelen Ad, Mail ve Mesaj bilgilerini tabloya ekler.</li>
+            <li><strong>Telegram Düğümü:</strong> Kendi Telegram ID'nize <code class="inline-code">🔔 Yeni Form Mesajı: {{ $json.ad }} - {{ $json.mesaj }}</code> formatında bildirim yollar.</li>
+            <li><strong>Gmail Düğümü:</strong> Müşterinin mail adresine (<code class="inline-code">{{ $json.email }}</code>) onay maili gönderir.</li>
+          </ol>
+        </section>
+
+        <!-- Bölüm 11 -->
+        <section id="bolum-11">
+          <h2>Bölüm 11: Yapay Zeka ile n8n — Akıllı Otomasyonlar</h2>
+          <p>n8n, ChatGPT (OpenAI), Claude (Anthropic) ve Gemini gibi gelişmiş LLM modellerini entegre edebileceğiniz özel yapay zeka düğümlerine sahiptir. Bu sayede sadece mekanik iş akışları değil, gelen metinleri anlamlandıran akıllı sistemler kurabilirsiniz.</p>
+
+          <div class="callout info">
+            <div class="callout-icon">🤖</div>
+            <div class="callout-content">
+              <h4>n8n AI Düğümleri</h4>
+              <p><strong>AI Agent:</strong> Yapay zeka ajanının, diğer n8n düğümlerini (veri çekme, mail atma) birer "araç" (tool) olarak kullanmasını sağlar.</p>
+              <p><strong>Ollama:</strong> Kendi bilgisayarınızda yerel ve ücretsiz çalışan Llama, Mistral modellerini n8n'e bağlar.</p>
+            </div>
+          </div>
+
+          <h3>11.3 Örnek Senaryo: E-posta Sınıflandırma</h3>
+          <p>Gmail'e gelen destek maillerini AI düğümüne göndererek prompt ile analiz ettirebiliriz:</p>
+          
+          <div class="code-container">
+            <div class="code-header">
+              <span class="code-lang">AI Prompt</span>
+            </div>
+            <pre><code>Gelen e-postayı analiz et ve sadece şu kategorilerden birini yaz: Acil, Normal, Şikayet, Fatura.
+Konu: {{ $json.subject }}
+İçerik: {{ $json.body }}</code></pre>
+          </div>
+          <p>Dönen kategori cevabına göre Switch düğümü kullanarak acil işleri anında yöneticinin telefonuna Telegram bildirimi olarak yönlendirirsiniz.</p>
+        </section>
+
+        <!-- Bölüm 12 -->
+        <section id="bolum-12">
+          <h2>Bölüm 12: Sık Kullanılan Uygulama Entegrasyonları</h2>
+          <p>n8n içerisinde 400'den fazla entegrasyon barındırır. En çok tercih edilenler:</p>
+          <ul>
+            <li><strong>Google Workspace:</strong> Sheets, Drive, Gmail, Docs ve Calendar.</li>
+            <li><strong>Mesajlaşma:</strong> Telegram, Slack, WhatsApp Business ve Discord.</li>
+            <li><strong>Sosyal Medya:</strong> LinkedIn, Twitter/X, Instagram ve YouTube.</li>
+            <li><strong>CRM ve Proje Yönetimi:</strong> Notion, Airtable, HubSpot, Trello ve ClickUp.</li>
+            <li><strong>Ödeme Sistemleri:</strong> Stripe, PayPal ve WooCommerce/Shopify.</li>
+          </ul>
+        </section>
+
+        <!-- Bölüm 13 -->
+        <section id="bolum-13">
+          <h2>Bölüm 13: Hata Yönetimi ve Güvenilirlik</h2>
+          <p>Her otomasyon sisteminde zaman zaman API hataları veya kesintiler yaşanabilir. n8n'de bunları yönetmek için:</p>
+          <p><strong>Error Trigger Workflow:</strong> Bir iş akışında hata çıktığı anda tetiklenen ve admin'e hata loglarını bildiren merkezi bir acil durum akışı kurabilirsiniz.</p>
+          <p><strong>Continue on Fail:</strong> Bir düğüm hata verse dahi (örn. bildirim gitmediyse) ana sürecin kesintiye uğramadan devam etmesini sağlayabilirsiniz.</p>
+        </section>
+
+        <!-- Bölüm 14 -->
+        <section id="bolum-14">
+          <h2>Bölüm 14: İleri Seviye İpuçları ve En İyi Uygulamalar</h2>
+          <ul>
+            <li><strong>Sticky Notes Kullanın:</strong> Akışlarınızın üzerine notlar ekleyerek 6 ay sonra baktığınızda neyin ne işe yaradığını kolayca hatırlayın.</li>
+            <li><strong>Küçük Parçalar Halinde Test Edin:</strong> Tüm sistemi tek seferde çalıştırmak yerine düğüm düğüm test ederek hataları erken yakalayın.</li>
+            <li><strong>Hassas Bilgileri Gizleyin:</strong> API anahtarlarını doğrudan düğümlere yazmak yerine n8n'in şifreli <i>Credentials</i> hafızasında saklayın.</li>
+            <li><strong>Yedekleyin:</strong> Hazırladığınız kıymetli akışları düzenli olarak JSON formatında bilgisayarınıza yedekleyin (Export).</li>
+          </ul>
+        </section>
+
+        <!-- Bölüm 15 -->
+        <section id="bolum-15">
+          <h2>Bölüm 15: Sık Sorulan Sorular (SSS)</h2>
+          <p><strong>n8n kullanmak için kod bilmem gerekiyor mu?</strong><br>Hayır. Temel otomasyonların %90'ını hiç kod yazmadan sürükle-bırak yöntemiyle yapabilirsiniz.</p>
+          <p><strong>n8n tamamen ücretsiz mi?</strong><br>Kendi bilgisayarınızda veya sunucunuzda çalıştırırsanız (self-hosted) kişisel ve iç kullanım için tamamen ücretsizdir.</p>
+          <p><strong>Bilgisayarımı kapatırsam otomasyonlarım durur mu?</strong><br>Evet. Eğer n8n'i lokal bilgisayarınızda çalıştırıyorsanız bilgisayar kapandığında akışlar durur. Kesintisiz çalışma için bulut sunucuya taşınmalıdır.</p>
+        </section>
+
+        <!-- Bölüm 16 -->
+        <section id="bolum-16">
+          <h2>Bölüm 16: Sonuç ve Sonraki Adımlar</h2>
+          <p>n8n, otomasyon dünyasındaki en güçlü, esnek ve özgür araçlardan biridir. Bu makale ile Docker üzerinde n8n kurmayı, veri akışını yönetmeyi, entegrasyonlar yapmayı ve yapay zekayı süreçlerinize dahil etmeyi öğrendiniz.</p>
+          <p>Kendinize küçük bir hedef koyarak ilk otomasyonunuzu (örneğin sabah hava durumu maili) bugün kurun ve otomasyon dünyasına adım atın!</p>
+          
+          <div class="callout tip">
+            <div class="callout-icon">🎓</div>
+            <div class="callout-content">
+              <h4>Siber Akademi</h4>
+              <p>Bu makale, sıfır teknik bilgiye sahip kullanıcıların otomasyon dünyasında kendilerini geliştirebilmeleri için <strong>Toprak Ahmet Aydoğmuş</strong> tarafından Siber Akademi bünyesinde hazırlanmıştır.</p>
+            </div>
+          </div>
+        </section>
+
+      </article>
+
+      <!-- Interactive Quiz Widget -->
+      <div class="quiz-widget" id="quiz-card">
+        <div class="quiz-header">
+          <div class="quiz-title">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+            </svg>
+            <span>n8n Bilgi Değerlendirmesi</span>
+          </div>
+          <div class="quiz-progress" id="quiz-q-num">Soru 1/5</div>
+        </div>
+
+        <div id="quiz-active-content">
+          <div class="quiz-question" id="quiz-q-text">Soru yükleniyor...</div>
+          <div class="quiz-options" id="quiz-options-container">
+            <!-- JS will inject options here -->
+          </div>
+        </div>
+
+        <div id="quiz-results-container" style="display: none;">
+          <div class="quiz-results">
+            <div class="quiz-score-circle">
+              <div class="quiz-score-num" id="quiz-score-num">0/5</div>
+              <div class="quiz-score-label">Skor</div>
+            </div>
+            <h4 style="font-family: var(--font-heading);">Test Tamamlandı!</h4>
+            <p id="quiz-result-message">Sonuçlar hesaplanıyor...</p>
+            <button class="btn-email-copy" id="quiz-btn-reset" style="margin: 0 auto;">Yeniden Çöz</button>
+          </div>
+        </div>
+
+        <div class="quiz-footer">
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <button class="btn-quiz" id="quiz-btn-submit" disabled>Cevabı Gönder</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- --- Footer --- -->
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <h3>Toprak Ahmet Aydoğmuş</h3>
+        <p>Siber Akademi eğitmeni ve bilgisayar sistemleri uzmanı. Teknoloji, siber güvenlik ve yapay zeka otomasyonları hakkında içerikler üretmektedir.</p>
+        
+        <div style="margin-top: 15px; margin-bottom: 20px;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Geliştirdiğim Proje:</p>
+          <a href="https://utspro.co" target="_blank" style="font-family: var(--font-heading); font-weight: 700; color: #ff6d5a; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 8px;">
+            <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+            UTS Pro (utspro.co)
+          </a>
+        </div>
+
+        <div class="siber-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+          </svg>
+          Siber Akademi Güvencesiyle
+        </div>
+      </div>
+      
+      <div class="footer-contact">
+        <h4>İletişim &amp; Destek</h4>
+        <div class="contact-card-glass">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Sorularınız ve iş birlikleri için:</p>
+          <div class="contact-email">toprakahmetaydogmus0@gmail.com</div>
+          <button class="btn-email-copy" id="copy-email-btn" style="margin-bottom: 12px;">
+            <svg style="width: 16px; height: 16px; fill: white;" viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            E-postayı Kopyala
+          </button>
+          
+          <div class="footer-socials">
+            <a href="https://www.linkedin.com/in/toprak-ahmet-aydo%C4%9Fmu%C5%9F-60462534b/" target="_blank" class="social-link" title="LinkedIn">
+              <svg viewBox="0 0 24 24">
+                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+              </svg>
+            </a>
+            <a href="https://hopp.bio/siberegitim" target="_blank" class="social-link" title="Hopp.bio Bio Link">
+              <svg viewBox="0 0 24 24">
+                <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <p>&copy; 2026 Siber Akademi. Tüm hakları saklıdır.</p>
+      <p>Tasarlayan &amp; Kodlayan: Antigravity AI</p>
+    </div>
+  </footer>
+
+  <script>
+    // --- Interactive Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- 1. 3D Card Hover Effect ---
+      const card3D = document.querySelector('.hero-card-3d');
+      
+      if (card3D) {
+        card3D.addEventListener('mousemove', (e) => {
+          const rect = card3D.getBoundingClientRect();
+          const x = e.clientX - rect.left; // x position within the element.
+          const y = e.clientY - rect.top;  // y position within the element.
+          
+          // Calculate normalized positions (-0.5 to 0.5)
+          const xc = ((x / rect.width) - 0.5) * 20; // max 10 degrees tilt
+          const yc = (((y / rect.height) - 0.5) * 20) * -1; // invert Y for standard tilt
+          
+          // Update variables for glass reflection radial gradient
+          card3D.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+          card3D.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+          
+          // Apply 3D rotation
+          card3D.style.transform = `rotateY(${xc}deg) rotateX(${yc}deg) translateY(-5px)`;
+        });
+        
+        card3D.addEventListener('mouseleave', () => {
+          card3D.style.transform = 'rotateY(0deg) rotateX(0deg) translateY(0)';
+          card3D.style.setProperty('--mouse-x', '50%');
+          card3D.style.setProperty('--mouse-y', '50%');
+        });
+      }
+
+      // --- 2. Scroll Spy and Reading Progress ---
+      const sections = document.querySelectorAll('article section');
+      const tocItems = document.querySelectorAll('.toc-item');
+      const progressBar = document.querySelector('.progress-bar');
+      
+      window.addEventListener('scroll', () => {
+        // Reading Progress Bar
+        const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        if (progressBar) {
+          progressBar.style.width = scrolled + '%';
+        }
+
+        // Scroll Spy active navigation item
+        let currentId = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (window.scrollY >= sectionTop - 120) {
+            currentId = section.getAttribute('id');
+          }
+        });
+
+        tocItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('data-section') === currentId) {
+            item.classList.add('active');
+          }
+        });
+      });
+
+      // --- 3. Real-Time Article Search ---
+      const searchInput = document.getElementById('search-input');
+      const searchCounter = document.getElementById('search-counter');
+      let matchingSections = [];
+      let currentMatchIndex = -1;
+
+      function clearActiveMatchHighlight() {
+        sections.forEach(sec => sec.classList.remove('active-match'));
+      }
+
+      if (searchInput && searchCounter) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+          clearActiveMatchHighlight();
+          
+          if (query.length < 2) {
+            matchingSections = [];
+            currentMatchIndex = -1;
+            searchCounter.style.display = 'none';
+            sections.forEach(section => {
+              section.style.display = 'block';
+              section.style.opacity = '1';
+            });
+            tocItems.forEach(item => {
+              item.style.display = 'block';
+            });
+            return;
+          }
+
+          matchingSections = [];
+          sections.forEach(section => {
+            const text = section.textContent.toLowerCase();
+            const sectionId = section.getAttribute('id');
+            const tocItem = document.querySelector(`.toc-item[data-section="${sectionId}"]`);
+            
+            if (text.includes(query)) {
+              section.style.display = 'block';
+              section.style.opacity = '1';
+              if (tocItem) tocItem.style.display = 'block';
+              matchingSections.push(section);
+            } else {
+              section.style.display = 'none';
+              if (tocItem) tocItem.style.display = 'none';
+            }
+          });
+          
+          if (matchingSections.length > 0) {
+            currentMatchIndex = 0;
+            searchCounter.textContent = `1/${matchingSections.length}`;
+            searchCounter.style.display = 'inline-block';
+            matchingSections[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            matchingSections[0].classList.add('active-match');
+          } else {
+            currentMatchIndex = -1;
+            searchCounter.textContent = '0/0';
+            searchCounter.style.display = 'inline-block';
+          }
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (matchingSections.length === 0) return;
+            
+            clearActiveMatchHighlight();
+            
+            if (e.shiftKey) {
+              currentMatchIndex = (currentMatchIndex - 1 + matchingSections.length) % matchingSections.length;
+            } else {
+              currentMatchIndex = (currentMatchIndex + 1) % matchingSections.length;
+            }
+            
+            const targetSection = matchingSections[currentMatchIndex];
+            searchCounter.textContent = `${currentMatchIndex + 1}/${matchingSections.length}`;
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            targetSection.classList.add('active-match');
+          }
+        });
+      }
+
+      // --- 4. Code Clipboard Copy Tool ---
+      const copyButtons = document.querySelectorAll('.btn-copy');
+      
+      copyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const container = button.closest('.code-container');
+          const codeEl = container.querySelector('code');
+          const textToCopy = codeEl.innerText;
+          
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = `
+              <svg style="width: 14px; height: 14px; fill: white;" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg> Kopyalandı!`;
+            button.style.backgroundColor = '#10b981';
+            button.style.borderColor = '#10b981';
+            
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+              button.style.backgroundColor = '';
+              button.style.borderColor = '';
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy: ', err);
+          });
+        });
+      });
+
+      // --- 5. Interactive Quiz Widget ---
+      const quizData = [
+        {
+          question: "n8n ne demektir ve bu isim nereden gelmektedir?",
+          options: [
+            "\"Node-based automation\" kelimelerinin birleşimiyle oluşur (n-8-n, aradaki 8 harf: odematio).",
+            "\"Network agent node number\" kelimelerinin kısaltmasıdır.",
+            "\"Nano task runner system\" kelimelerinin bir araya gelmesidir.",
+            "\"New automation system v8\" anlamına gelen özel bir koddur."
+          ],
+          correct: 0,
+          feedback: "Doğru! n8n \"nodemation\" kelimesinden gelir. Baş harfi 'n', son harfi 'n' ve aralarında 'odematio' kelimesine ait 8 harf barındırır."
+        },
+        {
+          question: "Her otomasyon sisteminin temelini oluşturan iki ana parça hangisidir?",
+          options: [
+            "Veri Girişi ve Veri Çıkışı (Input / Output)",
+            "İnternet Bağlantısı ve Sunucu Gücü (Internet / VPS)",
+            "Tetikleyici (Trigger) ve Aksiyon (Action)",
+            "Web sitesi tasarımı ve Veritabanı yapısı (UI / DB)"
+          ],
+          correct: 2,
+          feedback: "Harika! Otomasyonların temel mantığı \"X olduğunda (Trigger), Y'yi yap (Action)\" şeklindedir."
+        },
+        {
+          question: "Hazırladığımız otomasyonların bilgisayarımız kapalıyken de 7/24 çalışmasını istiyorsak n8n'i nerede çalıştırmalıyız?",
+          options: [
+            "Bilgisayarımızda terminali açık ve arka planda kilitli tutarak.",
+            "n8n Cloud sürümünde veya bir sanal sunucu (VPS) üzerinde barındırarak.",
+            "Google Sheets'e doğrudan n8n eklentisi kurarak.",
+            "Bilgisayarımızın güç tasarrufu modunu kapatıp uyku moduna almayarak."
+          ],
+          correct: 1,
+          feedback: "Kesinlikle doğru! Yerel kurulumda bilgisayar kapanırsa otomasyonlar da durur. 7/24 kesintisiz çalışma için VPS veya n8n Cloud şarttır."
+        },
+        {
+          question: "n8n düğümleri (node) arasında akan verinin bilgisayarlar tarafından kolayca okunmasını sağlayan standart format hangisidir?",
+          options: [
+            "XML (.xml)",
+            "JSON (JavaScript Object Notation)",
+            "CSV (Comma Separated Values)",
+            "YAML (.yaml)"
+          ],
+          correct: 1,
+          feedback: "Doğru! n8n'de tüm veriler JSON formatında \"anahtar: değer\" çiftleri halinde düğümler arasında akar."
+        },
+        {
+          question: "Bir otomasyon sürecinde hata oluştuğunda otomatik olarak devreye girip bize bildirim gönderen özel n8n düğümü hangisidir?",
+          options: [
+            "IF Node",
+            "Webhook Trigger",
+            "Error Trigger",
+            "Schedule Trigger"
+          ],
+          correct: 2,
+          feedback: "Tebrikler! Error Trigger düğümü, başka iş akışlarında bir hata oluştuğunda tetiklenen ve acil durum bildirimi (Telegram, Mail) gönderen hayat kurtarıcı bir düğümdür."
+        }
+      ];
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let selectedOptionIndex = null;
+      let hasSubmitted = false;
+
+      const qNumText = document.getElementById('quiz-q-num');
+      const questionText = document.getElementById('quiz-q-text');
+      const optionsContainer = document.getElementById('quiz-options-container');
+      const feedbackEl = document.getElementById('quiz-feedback');
+      const submitBtn = document.getElementById('quiz-btn-submit');
+
+      function loadQuestion() {
+        hasSubmitted = false;
+        selectedOptionIndex = null;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Cevabı Gönder";
+        feedbackEl.textContent = "";
+        feedbackEl.className = "quiz-feedback";
+
+        const currentQuiz = quizData[currentQuestionIndex];
+        qNumText.textContent = `Soru ${currentQuestionIndex + 1}/${quizData.length}`;
+        questionText.textContent = currentQuiz.question;
+        optionsContainer.innerHTML = '';
+
+        currentQuiz.options.forEach((option, index) => {
+          const optionEl = document.createElement('div');
+          optionEl.className = 'quiz-option';
+          optionEl.innerHTML = `
+            <span class="quiz-option-letter">${String.fromCharCode(65 + index)}</span>
+            <span class="quiz-option-text">${option}</span>
+          `;
+          optionEl.addEventListener('click', () => selectOption(index));
+          optionsContainer.appendChild(optionEl);
+        });
+      }
+
+      function selectOption(index) {
+        if (hasSubmitted) return;
+        selectedOptionIndex = index;
+        submitBtn.disabled = false;
+
+        const options = optionsContainer.querySelectorAll('.quiz-option');
+        options.forEach((opt, i) => {
+          opt.classList.remove('selected');
+          if (i === index) opt.classList.add('selected');
+        });
+      }
+
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+          if (!hasSubmitted) {
+            hasSubmitted = true;
+            const currentQuiz = quizData[currentQuestionIndex];
+            const options = optionsContainer.querySelectorAll('.quiz-option');
+            
+            options[selectedOptionIndex].classList.remove('selected');
+            
+            if (selectedOptionIndex === currentQuiz.correct) {
+              options[selectedOptionIndex].classList.add('correct');
+              feedbackEl.innerHTML = `✅ ${currentQuiz.feedback}`;
+              feedbackEl.className = "quiz-feedback success";
+              score++;
+            } else {
+              options[selectedOptionIndex].classList.add('incorrect');
+              options[currentQuiz.correct].classList.add('correct');
+              feedbackEl.innerHTML = `❌ Yanlış. Doğru cevap: ${String.fromCharCode(65 + currentQuiz.correct)} seçeneğidir. ${currentQuiz.feedback}`;
+              feedbackEl.className = "quiz-feedback error";
+            }
+            
+            if (currentQuestionIndex === quizData.length - 1) {
+              submitBtn.textContent = "Sonuçları Göster";
+            } else {
+              submitBtn.textContent = "Sonraki Soru";
+            }
+          } else {
+            if (currentQuestionIndex < quizData.length - 1) {
+              currentQuestionIndex++;
+              loadQuestion();
+            } else {
+              showResults();
+            }
+          }
+        });
+
+        loadQuestion();
+      }
+
+      function showResults() {
+        const quizContent = document.getElementById('quiz-active-content');
+        const quizResults = document.getElementById('quiz-results-container');
+        const scoreNum = document.getElementById('quiz-score-num');
+        const resultMsg = document.getElementById('quiz-result-message');
+        const resetBtn = document.getElementById('quiz-btn-reset');
+        
+        if (quizContent && quizResults && scoreNum && resultMsg) {
+          quizContent.style.display = 'none';
+          quizResults.style.display = 'block';
+          submitBtn.style.display = 'none';
+          
+          scoreNum.textContent = `${score}/${quizData.length}`;
+          
+          let message = "";
+          if (score === quizData.length) {
+            message = "Tebrikler! Gerçek bir n8n otomasyon şampiyonusunuz. Toprak Ahmet Aydoğmuş makalesini kusursuz anlamışsınız!";
+          } else if (score >= 3) {
+            message = "Güzel iş! n8n temellerine oldukça hakimsiniz. Küçük detayları tekrar gözden geçirerek mükemmelleştirebilirsiniz.";
+          } else {
+            message = "n8n dünyasında henüz yolun başındasınız. Makaleyi daha detaylı okuyarak bilginizi artırabilir ve tekrar deneyebilirsiniz!";
+          }
+          resultMsg.textContent = message;
+          
+          if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+              currentQuestionIndex = 0;
+              score = 0;
+              quizContent.style.display = 'block';
+              quizResults.style.display = 'none';
+              submitBtn.style.display = 'block';
+              loadQuestion();
+            });
+          }
+        }
+      }
+
+      // --- 6. Interactive Workflow Simulator ---
+      const simTabs = document.querySelectorAll('.sim-tab');
+      const simStepsContainer = document.getElementById('sim-steps');
+      
+      const simData = {
+        form: [
+          { type: 'trigger', title: 'İletişim Formu (Webhook)', desc: 'Kullanıcı sitedeki formu doldurduğunda tetiklenir ve veriyi POST olarak gönderir.' },
+          { type: 'action', title: 'Google Sheets (Append Row)', desc: 'Müşterinin Adını, Mail adresini ve Mesajını tabloya yeni bir satır olarak ekler.' },
+          { type: 'action', title: 'Telegram (Send Message)', desc: 'Admin telefonuna "Yeni form mesajı geldi!" ve içeriğini bildirim olarak atar.' },
+          { type: 'action', title: 'Gmail (Send Email)', desc: 'Müşterinin e-postasına "Mesajınızı aldık" onay mailini otomatik olarak gönderir.' }
+        ],
+        fiyat: [
+          { type: 'trigger', title: 'Schedule Trigger (Her Sabah 09:00)', desc: 'Sistemin her gün belirlenen saatte otomatik olarak çalışmasını tetikler.' },
+          { type: 'action', title: 'HTTP Request (Fiyat API)', desc: 'Hedef e-ticaret sitesinin API\'sinden ilgili ürünün güncel fiyat verisini çeker.' },
+          { type: 'action', title: 'IF Node (Fiyat Düştü Mü?)', desc: 'Gelen fiyatın eski fiyattan düşük olup olmadığını kontrol eder. Düşükse YES yolundan devam eder.' },
+          { type: 'action', title: 'WhatsApp Node (Send Notification)', desc: 'YES çıkışında kullanıcıya "Ürün fiyatı düştü! Hemen satın al." linkli mesajı atar.' }
+        ],
+        ai: [
+          { type: 'trigger', title: 'Gmail Trigger (Gelen Kutusu)', desc: 'Destek mail adresine yeni bir e-posta geldiği anda tetiklenir.' },
+          { type: 'action', title: 'Anthropic Claude Node (AI)', desc: 'E-postanın içeriğini ve tonunu inceleyip konusunu (Teknik Destek / Satış / Fatura) sınıflandırır.' },
+          { type: 'action', title: 'Switch Node (Kategoriye Göre Yönlendir)', desc: 'Claude\'un belirlediği kategoriye göre akışı farklı yollara böler.' },
+          { type: 'action', title: 'Slack / CRM Action', desc: 'Faturaysa Muhasebe kanalına, Teknikse Jira sistemine otomatik kayıt açıp ilgili ekibe yönlendirir.' }
+        ]
+      };
+
+      function loadSimTab(tabId) {
+        if (!simStepsContainer) return;
+        
+        simStepsContainer.innerHTML = '';
+        const steps = simData[tabId];
+        
+        steps.forEach((step, index) => {
+          const stepEl = document.createElement('div');
+          stepEl.className = `sim-step ${step.type}`;
+          stepEl.innerHTML = `
+            <div class="step-type">${step.type === 'trigger' ? 'Tetikleyici' : 'Aksiyon'}</div>
+            <div class="step-details">
+              <div class="step-title">${step.title}</div>
+              <div class="step-desc">${step.desc}</div>
+            </div>
+          `;
+          simStepsContainer.appendChild(stepEl);
+          
+          if (index < steps.length - 1) {
+            const arrowEl = document.createElement('div');
+            arrowEl.className = 'sim-arrow';
+            arrowEl.innerHTML = `
+              <svg style="width: 20px; height: 20px; fill: var(--text-muted);" viewBox="0 0 24 24">
+                <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/>
+              </svg>
+            `;
+            simStepsContainer.appendChild(arrowEl);
+          }
+        });
+      }
+
+      simTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          simTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const tabId = tab.getAttribute('data-sim');
+          loadSimTab(tabId);
+        });
+      });
+
+      if (simStepsContainer) {
+        loadSimTab('form');
+      }
+
+      // --- 7. Email Copy Button ---
+      const copyEmailBtn = document.getElementById('copy-email-btn');
+      const emailTextEl = document.querySelector('.contact-email');
+      
+      if (copyEmailBtn && emailTextEl) {
+        copyEmailBtn.addEventListener('click', () => {
+          const email = emailTextEl.textContent.trim();
+          navigator.clipboard.writeText(email).then(() => {
+            const originalText = copyEmailBtn.innerHTML;
+            copyEmailBtn.innerHTML = `
+              <svg style="width: 16px; height: 16px; fill: white;" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg> Kopyalandı!`;
+            copyEmailBtn.style.backgroundColor = '#10b981';
+            
+            setTimeout(() => {
+              copyEmailBtn.innerHTML = originalText;
+              copyEmailBtn.style.backgroundColor = '';
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy: ', err);
+          });
+        });
+      }
+
+      // --- 8. Mobile Menu Toggle ---
+      const menuToggleBtn = document.getElementById('menu-toggle-btn');
+      const sidebarElement = document.querySelector('.sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+      const tocLinks = document.querySelectorAll('.toc-item a');
+
+      if (menuToggleBtn && sidebarElement && sidebarOverlay) {
+        const toggleMenu = () => {
+          sidebarElement.classList.toggle('open');
+          sidebarOverlay.classList.toggle('active');
+        };
+
+        const closeMenu = () => {
+          sidebarElement.classList.remove('open');
+          sidebarOverlay.classList.remove('active');
+        };
+
+        menuToggleBtn.addEventListener('click', toggleMenu);
+        sidebarOverlay.addEventListener('click', closeMenu);
+
+        tocLinks.forEach(link => {
+          link.addEventListener('click', closeMenu);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
